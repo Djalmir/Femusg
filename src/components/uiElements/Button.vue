@@ -62,18 +62,4 @@ button:active {
 	filter: brightness(.8);
 	box-shadow: var(--inset-light-box-shadow);
 } */
-
-.loader {
-	animation: loader 1.5s linear infinite;
-}
-
-@keyframes loader {
-	0% {
-		transform: rotate(0deg);
-	}
-
-	100% {
-		transform: rotate(360deg);
-	}
-}
 </style>

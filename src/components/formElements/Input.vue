@@ -1,9 +1,9 @@
 <template>
 	<label>
-		<span>
+		<span v-if="label">
 			{{ label }}
 		</span>
-		<input v-bind="$attrs" @input="$emit('update:modelValue', $event.target.value)" />
+		<input @input="$emit('update:modelValue', $event.target.value)" v-bind="$attrs" />
 	</label>
 </template>
 

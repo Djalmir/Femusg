@@ -2,7 +2,7 @@
 	<section>
 		<form action="javascript:void(0)" @submit="login">
 			<h2>Login</h2>
-			<Input class="input" type="mail" label="Email" v-model="email" required />
+			<Input class="input" type="email" label="Email" v-model="email" required />
 			<Input class="input" type="password" label="Senha" v-model="password" required />
 			<Button class="submitBt" type="submit">Entrar</Button>
 		</form>
@@ -11,15 +11,32 @@
 </template>
 
 <script setup>
-import { ref, inject } from 'vue'
+import { onMounted, ref, inject } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import Input from '@/components/formElements/Input.vue'
 import Button from '@/components/uiElements/Button.vue'
 import api from '@/services/api.js'
+const store = useStore()
+const router = useRouter()
 
 const Dialog = inject('Dialog').value
 
 const email = ref('')
 const password = ref('')
+
+onMounted(() => {
+	if (store.state.userProfile) {
+		switch (store.state.userProfile.profile) {
+			case 'evaluator':
+				router.push({ name: 'Evaluator' })
+				break
+			case 'admin':
+				router.push({ name: 'Admin' })
+				break
+		}
+	}
+})
 
 function login() {
 	api.login({
@@ -27,7 +44,21 @@ function login() {
 		password: password.value
 	})
 		.then((res) => {
-			console.log(res)
+			let userProfile = {
+				token: res.data.token,
+				refreshToken: res.data.refreshToken,
+				...res.data.user
+			}
+			store.dispatch('setUserProfile', userProfile)
+			switch (userProfile.profile) {
+				case 'evaluator':
+					router.push({ name: 'Evaluator' })
+					break
+				case 'admin':
+					router.push({ name: 'Admin' })
+					break
+
+			}
 		})
 }
 </script>

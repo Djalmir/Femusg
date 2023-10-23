@@ -46,6 +46,7 @@ defineExpose({
 	inset: 0;
 	display: grid;
 	place-items: center;
+	z-index: 5;
 }
 
 .dialogShadow {

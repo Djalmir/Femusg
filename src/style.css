@@ -48,8 +48,11 @@
 
 	--scroll-track-bg: transparent;
 	--scroll-thumb-bg: #393939;
+	--light-scroll-thumb-bg: #999;
 	--scroll-thumb-hover-bg: #454545;
+	--light-scroll-thumb-hover-bg: #fff;
 	--scroll-thumb-active-bg: #303030;
+	--light-scroll-thumb-active-bg: #777;
 
 	/*General Settings*/
 	font-family: 'Roboto', sans-serif;
@@ -95,13 +98,25 @@ body {
 	border-radius: 7px;
 }
 
+.light-theme ::-webkit-scrollbar-thumb {
+	background: var(--light-scroll-thumb-bg);
+}
+
 ::-webkit-scrollbar-thumb:hover {
 	background: var(--scroll-thumb-hover-bg);
+}
+
+.light-theme ::-webkit-scrollbar-thumb:hover {
+	background: var(--light-scroll-thumb-hover-bg);
 }
 
 ::-webkit-scrollbar-thumb:active {
 	background: var(--scroll-thumb-active-bg);
 	box-shadow: inset 1px 1px 1px var(--dark-bg1);
+}
+
+.light-theme ::-webkit-scrollbar-thumb:active {
+	background: var(--light-scroll-thumb-active-bg);
 }
 
 ::-webkit-scrollbar-corner {
@@ -135,4 +150,18 @@ body {
 .light-theme {
 	color: var(--light-font1) !important;
 	background: linear-gradient(145deg, var(--light-bg2), var(--light-bg1));
+}
+
+.loader {
+	animation: loader 1.5s linear infinite;
+}
+
+@keyframes loader {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
 }

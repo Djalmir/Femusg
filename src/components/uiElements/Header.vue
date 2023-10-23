@@ -2,30 +2,38 @@
 	<header>
 		<img src="/galvao.png" alt="Brasão de Galvão" class="logo" />
 		<h1>Femusg</h1>
-		<Button class="settingsBt" style="margin-left: auto;" @click="e => { dropdown.toggleShowing(e.target.getBoundingClientRect(), 'right') }">
-			<Icon class="more-vertical" :size="1.25" style="pointer-events: none;" />
-		</Button>
-		<!-- <Switch v-model="darkTheme" leftIcon="moon" rightIcon="sun" /> -->
+		<div style="margin-left: auto; display: flex; gap: 17px">
+			<Button class="headerBt" v-if="userProfile" @click="dispatchEvent('refreshTable')">
+				<Icon class="refresh" :size="1.25" style="pointer-events: none;" />
+			</Button>
+			<Button class="headerBt" @click="e => { dropdown.toggleShowing(e.target.getBoundingClientRect(), 'right') }">
+				<Icon class="more-vertical" :size="1.25" style="pointer-events: none;" />
+			</Button>
+		</div>
 	</header>
 	<DropDown :list="dropdownList" ref="dropdown" />
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import Button from '@/components/uiElements/Button.vue'
-import Switch from '@/components/formElements/Switch.vue'
 import Icon from '@/components/uiElements/Icon.vue'
 import DropDown from '@/components/uiElements/DropDown.vue'
+import { dispatchEvent } from '@/utils.js'
 
 const darkTheme = ref(window.matchMedia("(prefers-color-scheme: dark)").matches)
 const emit = defineEmits(['toggleTheme'])
-
 watch(darkTheme, () => {
 	emit('toggleTheme')
 })
 
+const store = useStore()
+const userProfile = computed(() => { return store.state.userProfile })
+const router = useRouter()
 const dropdown = ref()
-const dropdownList = [
+const dropdownList = ref([
 	{
 		label: 'Tema',
 		rightComponent: 'Switch',
@@ -37,16 +45,17 @@ const dropdownList = [
 		}
 	},
 	{
+		vIf: userProfile,
 		label: 'Sair',
 		rightComponent: 'Icon',
 		class: 'logout',
 		action: () => {
-			console.log('sair')
+			store.dispatch('setUserProfile', null)
+			router.replace({ name: 'Login' })
+			document.body.click()
 		}
 	}
-]
-
-
+])
 
 </script>
 
@@ -59,7 +68,8 @@ header {
 	display: flex;
 	align-items: center;
 	gap: 17px;
-	backdrop-filter: blur(10px);
+	position: relative;
+	z-index: 2;
 }
 
 .logo {
@@ -74,7 +84,7 @@ header {
 	box-shadow: var(--light-box-shadow);
 }
 
-.settingsBt {
+.headerBt {
 	border-radius: 50%;
 	width: 37px;
 	height: 37px;
@@ -84,7 +94,7 @@ header {
 	background: linear-gradient(145deg, var(--dark-bg3), var(--dark-bg2));
 }
 
-.light-theme .settingsBt {
+.light-theme .headerBt {
 	background: linear-gradient(145deg, var(--light-bg3), var(--light-bg2));
 	color: var(--light-font2);
 }

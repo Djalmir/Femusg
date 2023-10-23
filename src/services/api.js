@@ -55,5 +55,11 @@ const configs = () => {
 export default {
 	login({ email, password }) {
 		return api.post('/v1/authenticate/login', { email, password })
+	},
+	getSingers() {
+		return api.get('/v1/singers/list', configs())
+	},
+	searchSinger(search) {
+		return api.get(`v1/singers/list-by-field?field=${ search }`, configs())
 	}
 }

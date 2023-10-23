@@ -13,6 +13,11 @@ const routes = [
 		name: 'Admin',
 		component: () => import('@/views/Admin.vue')
 	},
+	{
+		path: '/evaluator',
+		name: 'Evaluator',
+		component: () => import('@/views/Evaluator.vue')
+	},
 
 	{
 		path: '/:pathMatch(.*)',

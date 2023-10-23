@@ -12,12 +12,12 @@ import Icon from '@/components/uiElements/Icon.vue'
 
 const props = defineProps(['leftIcon', 'rightIcon', 'modelValue'])
 const emit = defineEmits(['update:modelValue'])
-const checked = ref(props.modelValue)
+const checked = computed(() => { return props.modelValue })
 watch(checked, () => {
 	emit('update:modelValue', checked.value)
 })
 function handleClick() {
-	checked.value = !checked.value
+	emit('update:modelValue', !checked.value)
 }
 
 const switchTranslate = computed(() => {

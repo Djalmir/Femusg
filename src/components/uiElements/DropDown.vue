@@ -2,15 +2,15 @@
 	<transition name="dropDownAnimation">
 		<div v-if="showing" class="dropdown" ref="dropdown">
 			<ul>
-				<li v-for="item in list" @click="item.action()">
+				<li v-for="item in reducedList" @click="item.action();">
 					<div v-if="item.leftComponent">
 						<Icon v-if="item.leftComponent == 'Icon'" :class="item.class" />
-						<Switch v-else-if="item.leftComponent == 'Switch'" :model-value="item.vModel" :leftIcon="item.leftIcon" :rightIcon="item.rightIcon" @click.stop />
+						<Switch v-else-if="item.leftComponent == 'Switch'" v-model="item.vModel" :leftIcon="item.leftIcon" :rightIcon="item.rightIcon" @click.stop />
 					</div>
 					{{ item.label }}
 					<div v-if="item.rightComponent">
 						<Icon v-if="item.rightComponent == 'Icon'" :class="item.class" />
-						<Switch v-else-if="item.rightComponent == 'Switch'" :model-value="item.vModel" :leftIcon="item.leftIcon" :rightIcon="item.rightIcon" @click.stop />
+						<Switch v-else-if="item.rightComponent == 'Switch'" v-model="item.vModel" :leftIcon="item.leftIcon" :rightIcon="item.rightIcon" @click.stop />
 					</div>
 				</li>
 			</ul>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Icon from '@/components/uiElements/Icon.vue'
 import Switch from '@/components/formElements/Switch.vue'
 
@@ -27,6 +27,17 @@ const dropdown = ref()
 const props = defineProps(['list'])
 const showing = ref(false)
 const transformOrigin = ref('left')
+
+const reducedList = ref(reduceList())
+
+function reduceList() {
+	return props.list.reduce((arr, curr) => {
+		if (curr.vIf || curr.vIf === undefined) {
+			arr.push(curr)
+		}
+		return arr
+	}, [])
+}
 
 function toggleShowing(coordinates, align) {
 	showing.value = !showing.value
@@ -40,6 +51,7 @@ function toggleShowing(coordinates, align) {
 
 function show(coordinates, align) {
 	transformOrigin.value = `top ${ align }`
+	reducedList.value = reduceList()
 	showing.value = true
 	setTimeout(() => {
 		dropdown.value.style.top = coordinates.y + coordinates.height + 3 + 'px'
@@ -55,6 +67,7 @@ function hideIfOutside(e) {
 }
 
 function hide() {
+	reducedList.value = []
 	showing.value = false
 	document.removeEventListener('click', hideIfOutside)
 }
@@ -74,7 +87,7 @@ defineExpose({ toggleShowing, show, hide })
 	box-shadow: var(--dark-box-shadow);
 	display: flex;
 	flex-direction: column;
-	z-index: 1;
+	z-index: 3;
 	transition: transform .2s, opacity .2s;
 	transform-origin: v-bind(transformOrigin);
 }

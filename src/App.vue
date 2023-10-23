@@ -27,9 +27,12 @@ function showMessage(msg) {
 function changeTheme() {
 	if (Array.from(document.documentElement.classList).includes('light-theme')) {
 		document.documentElement.classList.replace('light-theme', 'dark-theme')
+		document.querySelector("[name=theme-color]").setAttribute("content", "#242424")
 	}
-	else
+	else {
 		document.documentElement.classList.replace('dark-theme', 'light-theme')
+		document.querySelector("[name=theme-color]").setAttribute("content", "#dddddd")
+	}
 }
 </script>
 
