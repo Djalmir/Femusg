@@ -61,5 +61,14 @@ export default {
 	},
 	searchSinger(search) {
 		return api.get(`v1/singers/list-by-field?field=${ search }`, configs())
+	},
+	getSingerById(singerId) {
+		return api.get(`/v1/singers/details/${ singerId }`, configs())
+	},
+	getSingerRatings(singerId) {
+		return api.get(`/v1/singers-rating/singer/${ singerId }`, configs())
+	},
+	updateSingerData(singerId, data) {
+		return api.put(`/v1/singers/update/${ singerId }`, data, configs())
 	}
 }

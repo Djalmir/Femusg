@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, onBeforeUnmount } from 'vue'
 import Icon from '@/components/uiElements/Icon.vue'
 
 const headingRow = ref(null)
@@ -118,7 +118,7 @@ function handleChildrenChanged() {
 		row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
 		row.onmouseenter = () => {
 			row.style.filter = 'brightness(1.2)'
-			row.style.padding = '23px 17px'
+			row.style.padding = '7px 17px'
 		}
 		row.onmousedown = () => {
 			row.style.filter = 'brightness(.7)'
@@ -188,12 +188,26 @@ function refresh() {
 	handleChildrenChanged()
 }
 
+onBeforeUnmount(() => {
+	observer.value.disconnect()
+	themeObserver.value.disconnect()
+})
+
 defineExpose({
 	refresh
 })
 </script>
 
 <style scoped>
+.tableWrapper {
+	width: 100%;
+	height: v-bind(rowsWrapperHeight);
+	overflow: auto;
+	padding: 0 0 70px;
+	position: relative;
+	user-select: none;
+}
+
 .table {
 	min-width: 1024px;
 }
@@ -211,15 +225,6 @@ defineExpose({
 .light-theme .headingRow {
 	background: linear-gradient(145deg, var(--light-bg2), var(--light-bg1));
 	box-shadow: var(--light-box-shadow);
-}
-
-.tableWrapper {
-	width: 100%;
-	height: v-bind(rowsWrapperHeight);
-	overflow: auto;
-	padding: 0 0 70px;
-	position: relative;
-	user-select: none;
 }
 
 .loaderWrapper {

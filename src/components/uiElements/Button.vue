@@ -22,7 +22,8 @@ const props = defineProps({
 const loading = ref(false)
 
 document.addEventListener('setLoading', (e) => {
-	loading.value = e.detail ? true : false
+	if (props.type == 'submit')
+		loading.value = e.detail ? true : false
 })
 </script>
 
@@ -35,6 +36,7 @@ button {
 	border-radius: .3rem;
 	cursor: pointer;
 	box-shadow: var(--dark-box-shadow);
+	user-select: none;
 }
 
 button:hover {
@@ -45,6 +47,17 @@ button:hover {
 button:active {
 	filter: brightness(.8);
 	box-shadow: var(--inset-dark-box-shadow);
+}
+
+button:disabled {
+	opacity: .5;
+	cursor: not-allowed;
+	pointer-events: none;
+	background: linear-gradient(145deg, var(--dark-bg2), var(--dark-bg1));
+}
+
+.light-theme button:disabled {
+	background: linear-gradient(145deg, var(--dark-bg4), var(--dark-bg2));
 }
 
 /* .light-theme button {

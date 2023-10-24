@@ -12,9 +12,9 @@
 		</template>
 	</Table>
 	<transition name="roll">
-		<div class="searchDiv" v-if="scrolledUp" @keyup.enter="searchSinger">
-			<Input type="search" placeholder="Pesquisa" style="flex: 1;" v-model="search" />
-			<Button class="searchBt" @click="searchSinger">
+		<div class="searchDiv" v-if="scrolledUp" @keyup.enter="handleEnterKey">
+			<Input type="search" placeholder="Pesquisa" style="flex: 1;" v-model="search" :value="search" />
+			<Button class="searchBt" ref="searchBt" @click="searchSinger">
 				<Icon :size="1.5" class="search" />
 			</Button>
 		</div>
@@ -36,6 +36,7 @@ const table = ref()
 const singerModal = ref()
 const singers = ref([])
 const search = ref('')
+const searchBt = ref()
 const Dialog = inject('Dialog').value
 
 const scrolledUp = ref(true)
@@ -46,11 +47,11 @@ onMounted(() => {
 			setTimeout(() => {
 				let tableWrapper = document.querySelector('.tableWrapper')
 				tableWrapper.addEventListener('scroll', () => {
-					if (tableWrapper.scrollTop > lastScroll.value + 20) {
+					if (tableWrapper.scrollTop > lastScroll.value + 50) {
 						scrolledUp.value = false
 						lastScroll.value = tableWrapper.scrollTop
 					}
-					else if (tableWrapper.scrollTop < lastScroll.value - 20) {
+					else if (tableWrapper.scrollTop < lastScroll.value - 50) {
 						scrolledUp.value = true
 						lastScroll.value = tableWrapper.scrollTop
 					}
@@ -79,7 +80,7 @@ async function searchSinger() {
 		.then((res) => {
 			singers.value = res.data
 			if (!singers.value.length) {
-				Dialog.showMessage('<h1>Nenhum resultado encontrado</h1>')
+				Dialog.showMessage('<b>Nenhum resultado encontrado</b>')
 				getSingers()
 					.then(() => {
 						table.value.refresh()
@@ -90,6 +91,11 @@ async function searchSinger() {
 					table.value.refresh()
 				}, 0)
 		})
+}
+
+function handleEnterKey() {
+	searchSinger()
+	document.querySelector('.searchBt').focus()
 }
 
 </script>

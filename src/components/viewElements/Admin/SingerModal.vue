@@ -9,7 +9,21 @@
 					<Icon class="x" :size="1.5" />
 				</Button>
 				<section>
-					<h1>{{ singer.artistic_name }}</h1>
+					<header>
+						<h1>{{ singer.artistic_name }}</h1>
+						<div class="buttonsWrapper">
+							<Button class="headerBt refreshBt" @click="refreshSingerData">
+								<Icon class="refresh" :size="1.5" />
+							</Button>
+							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE'" @click="permitRatings">
+								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : 'Liberar para avaliação' }}
+							</Button>
+							<Button class="headerBt" disabled>
+								Calcular média
+							</Button>
+							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
+						</div>
+					</header>
 					<div class="content">
 						<hr>
 						<div class="flexDiv">
@@ -64,16 +78,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Button from '@/components/uiElements/Button.vue'
 import Icon from '@/components/uiElements/Icon.vue'
 import { cpfMask } from '@/utils.js'
+import api from '@/services/api.js'
 
 const singer = ref(false)
+const evaluation = computed(() => { return singer.value.evaluation })
+const ratingsLength = ref(0)
 
 function show(newSinger) {
-	console.log(newSinger)
 	singer.value = newSinger
+}
+
+function refreshSingerData() {
+	if (singer.value.evaluation == 'WAITING_CALL') {
+		api.getSingerById(singer.value.id)
+			.then((res) => {
+				singer.value.evaluation = res.data.evaluation
+			})
+	}
+	else if (singer.value.evaluation == 'EVALUATION_AVAILABLE') {
+		api.getSingerRatings(singer.value.id)
+			.then((res) => {
+				ratingsLength.value = res.data.user_criteria.length
+			})
+	}
+}
+
+function permitRatings() {
+	api.updateSingerData(singer.value.id, {
+		evaluation: 'EVALUATION_AVAILABLE'
+	})
+		.then(() => {
+			refreshSingerData()
+		})
 }
 
 defineExpose({
@@ -140,7 +180,38 @@ defineExpose({
 
 section {
 	height: 100%;
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 17px;
+	flex-wrap: wrap;
+	margin-bottom: 33px;
+}
+
+.buttonsWrapper {
+	display: flex;
+	gap: 7px;
+	padding: 0 11px 0 0;
+	/* margin-left: auto; */
+	position: relative;
+}
+
+.headerBt {
+	display: grid;
+	place-items: center;
+	padding: 3px 7px;
+}
+
+.buttonsWrapper sup {
+	position: absolute;
+	top: calc(100% + 3px);
+	right: 17px;
+	color: var(--danger-light);
 }
 
 .content {
