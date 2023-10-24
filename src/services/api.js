@@ -73,5 +73,8 @@ export default {
 	},
 	sendRatings(data) {
 		return api.post(`/v1/singers-rating/create`, data, configs())
+	},
+	calculateMedia(singerId) {
+		return api.get(`/v1/singers-rating/calculate-media/${ singerId }`, configs())
 	}
 }

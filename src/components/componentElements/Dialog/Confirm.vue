@@ -5,7 +5,7 @@
 		</Button>
 		<section ref="messageSection"></section>
 		<footer>
-			<Button class="confirmBt" @click="accept">Sim</Button>
+			<Button class="confirmBt" @click="$emit('accept')">Sim</Button>
 			<Button class="cancelBt" @click="$emit('close')">Não</Button>
 		</footer>
 	</div>
@@ -15,7 +15,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import Button from '@/components/uiElements/Button.vue'
 import Icon from '@/components/uiElements/Icon.vue'
-import { dispatchEvent } from '@/utils.js'
 
 const props = defineProps(['message'])
 const msg = computed(() => {
@@ -30,14 +29,6 @@ onMounted(() => {
 	messageSection.value.innerHTML = msg.value
 })
 
-const emit = defineEmits(['close'])
-
-function accept() {
-	dispatchEvent('sendConfirmation')
-	setTimeout(() => {
-		emit('close')
-	}, 0)
-}
 </script>
 
 <style scoped>
@@ -79,7 +70,7 @@ function accept() {
 
 section {
 	flex: 1;
-	padding: 13px;
+	padding: 27px 13px 13px;
 }
 
 footer {

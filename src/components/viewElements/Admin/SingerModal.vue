@@ -1,11 +1,11 @@
 <template>
 	<div class="singerModalWrapper" :style="{ pointerEvents: singer ? 'all' : 'none' }">
 		<transition name="fade">
-			<div class="shadow" @click="singer = null" v-if="singer"></div>
+			<div class="shadow" @click="close" v-if="singer"></div>
 		</transition>
 		<transition name="grow">
 			<div class="singerModal" v-if="singer">
-				<Button class="closeBt" @click="singer = null">
+				<Button class="closeBt" @click="close">
 					<Icon class="x" :size="1.5" />
 				</Button>
 				<section>
@@ -18,7 +18,7 @@
 							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE'" @click="permitRatings">
 								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : 'Liberar para avaliação' }}
 							</Button>
-							<Button class="headerBt" disabled>
+							<Button class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
 								Calcular média
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
@@ -83,6 +83,7 @@ import Button from '@/components/uiElements/Button.vue'
 import Icon from '@/components/uiElements/Icon.vue'
 import { cpfMask } from '@/utils.js'
 import api from '@/services/api.js'
+import Dialog from '../../uiElements/Dialog.vue'
 
 const singer = ref(false)
 const evaluation = computed(() => { return singer.value.evaluation })
@@ -90,9 +91,11 @@ const ratingsLength = ref(0)
 
 function show(newSinger) {
 	singer.value = newSinger
+	refreshSingerData()
 }
 
 function refreshSingerData() {
+
 	if (singer.value.evaluation == 'WAITING_CALL') {
 		api.getSingerById(singer.value.id)
 			.then((res) => {
@@ -114,6 +117,21 @@ function permitRatings() {
 		.then(() => {
 			refreshSingerData()
 		})
+}
+
+function calculateMedia() {
+	api.calculateMedia(singer.value.id)
+		.then((res) => {
+			Dialog.showMessage(`
+				<b>Média calculada com sucesso!</b>
+				${res.data}
+			`)
+		})
+}
+
+function close() {
+	singer.value = null
+	ratingsLength.value = 0
 }
 
 defineExpose({

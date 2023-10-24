@@ -5,7 +5,7 @@
 		</transition>
 		<transition name="roll">
 			<Message class="dialog" v-if="showing == 'message'" :message="message" @close="close" />
-			<Confirm class="dialog" v-else-if="showing == 'confirm'" :message="message" @accept="sendConfirmation" @close="close" />
+			<Confirm class="dialog" v-else-if="showing == 'confirm'" :message="message" @accept="res(true)" @close="close" />
 		</transition>
 	</div>
 </template>
@@ -17,27 +17,25 @@ import Confirm from '@/components/componentElements/Dialog/Confirm.vue'
 
 const showing = ref(null)
 const message = ref(null)
+const res = ref(null)
 
 function showMessage(msg) {
 	showing.value = 'message'
 	message.value = msg
 }
 
+
 function confirm(msg) {
 	return new Promise((resolve, reject) => {
-		function sendConfirmation() {
-			resolve(true)
-		}
 		showing.value = 'confirm'
 		message.value = msg
-		document.addEventListener('sendConfirmation', sendConfirmation)
+		res.value = resolve
 	})
 }
 
 function close() {
 	showing.value = null
 	message.value = null
-	document.removeEventListener('sendConfirmation', sendConfirmation)
 }
 
 defineExpose({

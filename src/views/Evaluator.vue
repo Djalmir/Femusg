@@ -26,7 +26,7 @@
 					<div class="ratings">
 						<div v-for="rating in Object.entries(ratings.value)" class="rating">
 							<b>{{ rating[1].label }}</b>
-							<Input class="rate" v-model="rating[1].rate" style="font-size: 1.5rem; text-align: center;" @input="(e) => rateMask(e, rating[1], 'rate')" placeholder="__,__" @blur="console.log(rating[1].rate)" />
+							<Input inputmode="numeric" class="rate" v-model="rating[1].rate" style="font-size: 1.5rem; text-align: center;" @input="(e) => rateMask(e, rating[1], 'rate')" placeholder="__,__" @focus="autoSelect" />
 						</div>
 					</div>
 				</div>
@@ -56,29 +56,30 @@ import { rateMask } from '@/utils.js'
 const Dialog = inject('Dialog').value
 const loading = ref(true)
 const singer = ref(null)
-const ratings = reactive({
-	value: {
-		tuning: {
-			label: 'Afinação',
-			rate: ''
-		},
-		interpretation: {
-			label: 'Interpretação',
-			rate: ''
-		},
-		rhythm: {
-			label: 'Ritmo',
-			rate: ''
-		},
-		letter: {
-			label: 'Letra',
-			rate: ''
-		},
-		diction: {
-			label: 'Dicção',
-			rate: ''
-		}
+const cleanRatings = JSON.stringify({
+	tuning: {
+		label: 'Afinação',
+		rate: ''
+	},
+	interpretation: {
+		label: 'Interpretação',
+		rate: ''
+	},
+	rhythm: {
+		label: 'Ritmo',
+		rate: ''
+	},
+	letter: {
+		label: 'Letra',
+		rate: ''
+	},
+	diction: {
+		label: 'Dicção',
+		rate: ''
 	}
+})
+const ratings = reactive({
+	value: JSON.parse(cleanRatings)
 })
 const ratingsWrapper = ref()
 
@@ -90,6 +91,7 @@ onMounted(() => {
 function getSinger() {
 	loading.value = true
 	singer.value = null
+	ratings.value = JSON.parse(cleanRatings)
 	api.getSingers()
 		.then((res) => {
 			singer.value = res.data.find(s => s.evaluation == 'EVALUATION_AVAILABLE')
@@ -122,10 +124,6 @@ async function evaluate() {
 				<span style="display: block; margin-top: 7px;">${ ratings.value.diction.rate }</span>
 			</div>
 		</div>
-
-			
-
-		
 	`)) {
 		api.sendRatings({
 			"singer_id": singer.value.id,
@@ -158,6 +156,10 @@ async function evaluate() {
 				refreshSingerData()
 			})
 	}
+}
+
+function autoSelect(e) {
+	e.target.select()
 }
 
 </script>
