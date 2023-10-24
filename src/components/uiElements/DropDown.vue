@@ -26,7 +26,7 @@ import Switch from '@/components/formElements/Switch.vue'
 const dropdown = ref()
 const props = defineProps(['list'])
 const showing = ref(false)
-const transformOrigin = ref('left')
+const transformOrigin = ref('top left')
 
 const reducedList = ref(reduceList())
 
@@ -78,6 +78,8 @@ defineExpose({ toggleShowing, show, hide })
 <style scoped>
 .dropdown {
 	position: absolute;
+	left: -1000px;
+	top: -1000px;
 	width: 90%;
 	max-width: 220px;
 	background: linear-gradient(145deg, var(--dark-bg3), var(--dark-bg2));

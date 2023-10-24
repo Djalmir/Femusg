@@ -39,14 +39,14 @@
 				Carregando...
 			</div>
 		</div>
-		<div v-else>
+		<div v-else class="noSingerAvailable">
 			<b>Nenhum cantor disponível para avaliação</b>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, inject } from 'vue'
+import { ref, reactive, onMounted, inject, onBeforeUnmount } from 'vue'
 import Button from '@/components/uiElements/Button.vue'
 import Input from '@/components/formElements/Input.vue'
 import Icon from '@/components/uiElements/Icon.vue'
@@ -100,7 +100,16 @@ function getSinger() {
 }
 
 async function evaluate() {
-	if (await Dialog.confirm(`
+	let allDone = true
+	for (const [key, value] of Object.entries(ratings.value)) {
+		if (value.rate == '') {
+			allDone = false
+		}
+	}
+	if (!allDone) {
+		return Dialog.showMessage('<b style="font-size: 1.25rem;">Por favor, preencha todas as avaliações.</b>')
+	}
+	else if (await Dialog.confirm(`
 		<h1 style="margin-bottom: 17px">Confirma as avaliações?</h1>
 		<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 17px; text-align: center;">
 			<div>
@@ -161,6 +170,10 @@ async function evaluate() {
 function autoSelect(e) {
 	e.target.select()
 }
+
+onBeforeUnmount(() => {
+	document.removeEventListener('refreshTable', getSinger)
+})
 
 </script>
 
@@ -298,7 +311,8 @@ hr {
 	width: 100%;
 }
 
-.loaderWrapper {
+.loaderWrapper,
+.noSingerAvailable {
 	position: absolute;
 	inset: 0;
 	display: grid;

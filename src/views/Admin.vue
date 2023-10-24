@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, onMounted, inject, onBeforeUnmount } from 'vue'
 import Table from '@/components/uiElements/Table.vue'
 import Input from '@/components/formElements/Input.vue'
 import Button from '@/components/uiElements/Button.vue'
@@ -41,6 +41,7 @@ const Dialog = inject('Dialog').value
 
 const scrolledUp = ref(true)
 const lastScroll = ref(0)
+let mounting = true
 onMounted(() => {
 	getSingers()
 		.then(() => {
@@ -56,14 +57,10 @@ onMounted(() => {
 						lastScroll.value = tableWrapper.scrollTop
 					}
 				})
+				mounting = false
 			}, 0)
 		})
-	document.addEventListener('refreshTable', () => {
-		getSingers()
-			.then(() => {
-				table.value.refresh()
-			})
-	})
+	document.addEventListener('refreshTable', getSingers)
 })
 
 async function getSingers() {
@@ -71,6 +68,10 @@ async function getSingers() {
 	await api.getSingers()
 		.then((res) => {
 			singers.value = res.data
+			if (!mounting)
+				setTimeout(() => {
+					table.value.refresh()
+				}, 0)
 		})
 }
 
@@ -82,9 +83,6 @@ async function searchSinger() {
 			if (!singers.value.length) {
 				Dialog.showMessage('<b>Nenhum resultado encontrado</b>')
 				getSingers()
-					.then(() => {
-						table.value.refresh()
-					})
 			}
 			else
 				setTimeout(() => {
@@ -98,6 +96,9 @@ function handleEnterKey() {
 	document.querySelector('.searchBt').focus()
 }
 
+onBeforeUnmount(() => {
+	document.removeEventListener('refreshTable', getSingers)
+})
 </script>
 
 <style scoped>

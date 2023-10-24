@@ -15,10 +15,10 @@
 							<Button class="headerBt refreshBt" @click="refreshSingerData">
 								<Icon class="refresh" :size="1.5" />
 							</Button>
-							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE'" @click="permitRatings">
-								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : 'Liberar para avaliação' }}
+							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE' || evaluation == 'ALREADY_EVALUATED'" @click="permitRatings">
+								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : evaluation == 'ALREADY_EVALUATED' ? 'Já avaliado' : 'Liberar para avaliação' }}
 							</Button>
-							<Button class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
+							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
 								Calcular média
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
@@ -78,13 +78,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import Button from '@/components/uiElements/Button.vue'
 import Icon from '@/components/uiElements/Icon.vue'
 import { cpfMask } from '@/utils.js'
 import api from '@/services/api.js'
-import Dialog from '../../uiElements/Dialog.vue'
 
+const Dialog = inject('Dialog').value
 const singer = ref(false)
 const evaluation = computed(() => { return singer.value.evaluation })
 const ratingsLength = ref(0)
@@ -115,7 +115,9 @@ function permitRatings() {
 		evaluation: 'EVALUATION_AVAILABLE'
 	})
 		.then(() => {
-			refreshSingerData()
+			setTimeout(() => {
+				refreshSingerData()
+			}, 0)
 		})
 }
 
@@ -123,9 +125,35 @@ function calculateMedia() {
 	api.calculateMedia(singer.value.id)
 		.then((res) => {
 			Dialog.showMessage(`
-				<b>Média calculada com sucesso!</b>
-				${res.data}
+				<h1 style="margin-bottom: 17px">Média calculada com sucesso!</h1>
+				<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 17px; text-align: center;">
+					<div>
+						<b>Avaliações</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.rating_totals }</span>
+					</div><br/>
+					<div>
+						<b>Afinação</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.averages[0].average }</span>
+					</div>
+					<div>
+						<b>Interpretação</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.averages[1].average }</span>
+					</div>
+					<div>
+						<b>Ritmo</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.averages[2].average }</span>
+					</div>
+					<div>
+						<b>Letra</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.averages[3].average }</span>
+					</div>
+					<div>
+						<b>Dicção</b><br/>
+						<span style="display: block; margin-top: 7px;">${ res.data.averages[4].average }</span>
+					</div>
+				</div>
 			`)
+			singer.value.evaluation = 'ALREADY_EVALUATED'
 		})
 }
 
