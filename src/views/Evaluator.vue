@@ -1,7 +1,7 @@
 <template>
 	<div class="wrapper">
 		<section v-if="singer">
-			<h1>{{ singer.artistic_name }}</h1>
+			<h1 style="font-size: 1.7rem;">{{ singer.artistic_name }}</h1>
 			<hr>
 			<div class="content">
 				<div class="flexDiv">
@@ -21,91 +21,157 @@
 					</div>
 				</div>
 				<hr>
-				<b style="font-size: 1.2rem;margin-top: 17px; display: block;">Avaliações</b>
-				<div class="ratingsWrapper">
-					<div>
-						<b>Afinação</b>
-						<div class="rating">
-							<NumberRoulette :showTen="true" />,
-							<NumberRoulette />
-							<NumberRoulette />
-						</div>
-					</div>
-					<div>
-						<b>Interpretação</b>
-						<div class="rating">
-							<NumberRoulette :showTen="true" />,
-							<NumberRoulette />
-							<NumberRoulette />
-						</div>
-					</div>
-					<div>
-						<b>Ritmo</b>
-						<div class="rating">
-							<NumberRoulette :showTen="true" />,
-							<NumberRoulette />
-							<NumberRoulette />
-						</div>
-					</div>
-					<div>
-						<b>Letra</b>
-						<div class="rating">
-							<NumberRoulette :showTen="true" />,
-							<NumberRoulette />
-							<NumberRoulette />
-						</div>
-					</div>
-					<div>
-						<b>Dicção</b>
-						<div class="rating">
-							<NumberRoulette :showTen="true" />,
-							<NumberRoulette />
-							<NumberRoulette />
+				<b style="font-size: 1.25rem; margin-top: 37px; display: block; text-align: center;">Avaliações</b>
+				<div class="ratingsWrapper" ref="ratingsWrapper">
+					<div class="ratings">
+						<div v-for="rating in Object.entries(ratings.value)" class="rating">
+							<b>{{ rating[1].label }}</b>
+							<Input class="rate" v-model="rating[1].rate" style="font-size: 1.5rem; text-align: center;" @input="(e) => rateMask(e, rating[1], 'rate')" placeholder="__,__" @blur="console.log(rating[1].rate)" />
 						</div>
 					</div>
 				</div>
+				<Button class="sendRaingsBt" @click="evaluate">Enviar Avaliações</Button>
 			</div>
 		</section>
+		<div v-else-if="loading" class="loaderWrapper">
+			<div class="loaderDiv">
+				<Icon class="loader" :size="2" />
+				Carregando...
+			</div>
+		</div>
+		<div v-else>
+			<b>Nenhum cantor disponível para avaliação</b>
+		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted, inject } from 'vue'
+import Button from '@/components/uiElements/Button.vue'
+import Input from '@/components/formElements/Input.vue'
+import Icon from '@/components/uiElements/Icon.vue'
 import api from '@/services/api.js'
-import NumberRoulette from '@/components/formElements/NumberRoulette.vue'
+import { rateMask } from '@/utils.js'
 
+const Dialog = inject('Dialog').value
+const loading = ref(true)
 const singer = ref(null)
+const ratings = reactive({
+	value: {
+		tuning: {
+			label: 'Afinação',
+			rate: ''
+		},
+		interpretation: {
+			label: 'Interpretação',
+			rate: ''
+		},
+		rhythm: {
+			label: 'Ritmo',
+			rate: ''
+		},
+		letter: {
+			label: 'Letra',
+			rate: ''
+		},
+		diction: {
+			label: 'Dicção',
+			rate: ''
+		}
+	}
+})
+const ratingsWrapper = ref()
+
 onMounted(() => {
 	getSinger()
 	document.addEventListener('refreshTable', getSinger)
 })
 
 function getSinger() {
+	loading.value = true
 	singer.value = null
 	api.getSingers()
 		.then((res) => {
 			singer.value = res.data.find(s => s.evaluation == 'EVALUATION_AVAILABLE')
+			loading.value = false
 		})
 }
+
+async function evaluate() {
+	if (await Dialog.confirm(`
+		<h1 style="margin-bottom: 17px">Confirma as avaliações?</h1>
+		<div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 17px; text-align: center;">
+			<div>
+				<b>Afinação</b><br/>
+				<span style="display: block; margin-top: 7px;">${ ratings.value.tuning.rate }</span>
+			</div>
+			<div>
+				<b>Interpretação</b><br/>
+				<span style="display: block; margin-top: 7px;">${ ratings.value.interpretation.rate }</span>
+			</div>
+			<div>
+				<b>Ritmo</b><br/>
+				<span style="display: block; margin-top: 7px;">${ ratings.value.rhythm.rate }</span>
+			</div>
+			<div>
+				<b>Letra</b><br/>
+				<span style="display: block; margin-top: 7px;">${ ratings.value.letter.rate }</span>
+			</div>
+			<div>
+				<b>Dicção</b><br/>
+				<span style="display: block; margin-top: 7px;">${ ratings.value.diction.rate }</span>
+			</div>
+		</div>
+
+			
+
+		
+	`)) {
+		api.sendRatings({
+			"singer_id": singer.value.id,
+			"criteria": [
+				{
+					"criterion_id": 1,
+					"rating": Number(ratings.value.tuning.rate.replace(',', '.'))
+				},
+				{
+					"criterion_id": 2,
+					"rating": Number(ratings.value.interpretation.rate.replace(',', '.'))
+				},
+				{
+					"criterion_id": 3,
+					"rating": Number(ratings.value.rhythm.rate.replace(',', '.'))
+				},
+				{
+					"criterion_id": 4,
+					"rating": Number(ratings.value.letter.rate.replace(',', '.'))
+				},
+				{
+					"criterion_id": 5,
+					"rating": Number(ratings.value.diction.rate.replace(',', '.'))
+				}
+			]
+
+		})
+			.then(() => {
+				Dialog.showMessage('Avaliações enviadas com sucesso')
+				refreshSingerData()
+			})
+	}
+}
+
 </script>
 
 <style scoped>
-.wrapper {
-	position: absolute;
-	inset: 0;
-	display: grid;
-	place-items: center;
-}
-
 section {
 	width: 90vw;
-	max-width: 1024px;
-	height: 380px;
-	max-height: 80vh;
+	max-width: 1980px;
+	max-height: 85vh;
 	overflow-y: auto;
 	overflow-x: hidden;
 	border-radius: .5rem;
 	padding: 17px;
+	margin: 33px auto 0;
 	background: linear-gradient(145deg, var(--dark-bg3), var(--dark-bg1));
 	box-shadow: var(--dark-box-shadow);
 }
@@ -187,28 +253,68 @@ hr {
 }
 
 .ratingsWrapper {
+	margin: 17px auto;
+	overflow: auto;
+	border-radius: .3rem;
+	background: linear-gradient(145deg, var(--dark-bg2-transparent), var(--dark-bg1));
+	box-shadow: inset 0 0 3px #000000d0;
+	position: relative;
 	display: flex;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 17px 7px;
-	margin-top: 17px;
+	max-width: fit-content;
 }
 
-.ratingsWrapper>div {
-	flex: 1;
-	width: 100%;
-	text-align: center;
+.light-theme .ratingsWrapper {
+	background: linear-gradient(145deg, var(--light-bg2-transparent), var(--light-bg1));
+}
+
+.scrollBt {
+	position: sticky;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1;
+}
+
+.ratings {
+	width: fit-content;
+	display: flex;
+	justify-content: space-evenly;
+	padding: 17px 33px;
+	gap: 0 33px;
+	width: fit-content;
 	position: relative;
 }
 
 .rating {
+	width: 140px;
+	text-align: center;
+	font-size: 1.1rem;
+}
+
+.rate {
 	margin-top: 7px;
-	text-align: left;
 	width: 100%;
-	height: 72px;
+}
+
+.loaderWrapper {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+}
+
+.loaderDiv {
 	display: flex;
-	justify-content: center;
 	align-items: center;
-	gap: 7px;
+	justify-content: center;
+	gap: .5rem;
+	width: fit-content;
+}
+
+.sendRaingsBt {
+	width: 100%;
+	max-width: 480px;
+	display: block;
+	margin: 17px auto;
 }
 </style>

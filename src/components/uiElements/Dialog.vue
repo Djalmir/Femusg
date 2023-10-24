@@ -4,8 +4,8 @@
 			<div class="dialogShadow" v-if="showing" @click="close"></div>
 		</transition>
 		<transition name="roll">
-			<Message class="dialog" v-if="showing == 'message'" :message="message" @close="close"/>
-			<Confirm class="dialog" v-else-if="showing == 'confirm'" :message="message" @close="close"/>
+			<Message class="dialog" v-if="showing == 'message'" :message="message" @close="close" />
+			<Confirm class="dialog" v-else-if="showing == 'confirm'" :message="message" @accept="sendConfirmation" @close="close" />
 		</transition>
 	</div>
 </template>
@@ -24,13 +24,20 @@ function showMessage(msg) {
 }
 
 function confirm(msg) {
-	showing.value = 'confirm'
-	message.value = msg
+	return new Promise((resolve, reject) => {
+		function sendConfirmation() {
+			resolve(true)
+		}
+		showing.value = 'confirm'
+		message.value = msg
+		document.addEventListener('sendConfirmation', sendConfirmation)
+	})
 }
 
 function close() {
 	showing.value = null
 	message.value = null
+	document.removeEventListener('sendConfirmation', sendConfirmation)
 }
 
 defineExpose({

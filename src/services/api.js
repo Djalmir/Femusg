@@ -70,5 +70,8 @@ export default {
 	},
 	updateSingerData(singerId, data) {
 		return api.put(`/v1/singers/update/${ singerId }`, data, configs())
+	},
+	sendRatings(data) {
+		return api.post(`/v1/singers-rating/create`, data, configs())
 	}
 }
