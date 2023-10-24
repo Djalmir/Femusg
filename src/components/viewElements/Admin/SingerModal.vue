@@ -18,7 +18,7 @@
 							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE' || evaluation == 'ALREADY_EVALUATED'" @click="permitRatings">
 								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : evaluation == 'ALREADY_EVALUATED' ? 'Já avaliado' : 'Liberar para avaliação' }}
 							</Button>
-							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
+							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 5" @click="calculateMedia">
 								Calcular média
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
