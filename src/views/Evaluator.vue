@@ -1,6 +1,6 @@
 <template>
 	<div class="wrapper">
-		<section v-if="singer">
+		<section v-if="singer && !singer.evaluated">
 			<h1 style="font-size: 1.7rem;">{{ singer.artistic_name }}</h1>
 			<hr>
 			<div class="content">
@@ -38,6 +38,9 @@
 				<Icon class="loader" :size="2" />
 				Carregando...
 			</div>
+		</div>
+		<div v-else-if="singer && singer.evaluated" class="noSingerAvailable">
+			Você já avaliou o cantor atual...
 		</div>
 		<div v-else class="noSingerAvailable">
 			<b>Nenhum cantor disponível para avaliação</b>
@@ -96,6 +99,12 @@ function getSinger() {
 		.then((res) => {
 			singer.value = res.data.find(s => s.evaluation == 'EVALUATION_AVAILABLE')
 			loading.value = false
+		})
+	api.getEvaluatingSinger()
+		.then((res) => {
+			// singer.value = res.data
+			// loading = false
+			singer.value.evaluated = res.data
 		})
 }
 

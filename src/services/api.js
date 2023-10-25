@@ -54,27 +54,30 @@ const configs = () => {
 
 export default {
 	login({ email, password }) {
-		return api.post('/v1/authenticate/login', { email, password })
+		return api.post('v1/authenticate/login', { email, password })
 	},
 	getSingers() {
-		return api.get('/v1/singers/list', configs())
+		return api.get('v1/singers/list', configs())
 	},
 	searchSinger(search) {
 		return api.get(`v1/singers/list-by-field?field=${ search }`, configs())
 	},
 	getSingerById(singerId) {
-		return api.get(`/v1/singers/details/${ singerId }`, configs())
+		return api.get(`v1/singers/details/${ singerId }`, configs())
 	},
 	getSingerRatings(singerId) {
-		return api.get(`/v1/singers-rating/singer/${ singerId }`, configs())
+		return api.get(`v1/singers-rating/singer/${ singerId }`, configs())
 	},
 	updateSingerData(singerId, data) {
-		return api.put(`/v1/singers/update/${ singerId }`, data, configs())
+		return api.put(`v1/singers/update/${ singerId }`, data, configs())
 	},
 	sendRatings(data) {
-		return api.post(`/v1/singers-rating/create`, data, configs())
+		return api.post(`v1/singers-rating/create`, data, configs())
 	},
 	calculateMedia(singerId) {
-		return api.get(`/v1/singers-rating/calculate-media/${ singerId }`, configs())
+		return api.get(`v1/singers-rating/calculate-media/${ singerId }`, configs())
+	},
+	getEvaluatingSinger() {
+		return api.get(`v1/singers/list-by-status`, configs())
 	}
 }
