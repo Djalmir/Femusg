@@ -121,39 +121,45 @@ function handleChildrenChanged() {
 	}
 
 	let rowsChildren = Array.from(rows.value.children)
-	rowsChildren.map((row, idx) => {
-		if (row.innerText.includes('%|')) {
-			row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
-			row.onmouseenter = () => {
-				row.style.filter = 'brightness(1.2)'
-				row.style.padding = '7px 17px'
+	console.log(rowsChildren)
+	if (!rowsChildren.length) {
+		renderingTable.value = false
+		autoUpdating.value = false
+	}
+	else
+		rowsChildren.map((row, idx) => {
+			if (row.innerText.includes('%|')) {
+				row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
+				row.onmouseenter = () => {
+					row.style.filter = 'brightness(1.2)'
+					row.style.padding = '7px 17px'
+				}
+				row.onmousedown = () => {
+					row.style.filter = 'brightness(.7)'
+				}
+				row.onmouseup = () => {
+					row.style.filter = 'brightness(1.2)'
+				}
+				row.onmouseleave = () => {
+					row.style.filter = 'brightness(1)'
+					row.style.padding = '0 17px'
+				}
+				let tds = row.innerText.split('%|').reduce((arr, curr) => {
+					arr.push(curr.trim())
+					return arr
+				}, [])
+				row.innerText = ''
+				tds.map((td) => {
+					let span = row.appendChild(document.createElement('span'))
+					span.style = spanStyle
+					span.innerText = td
+				})
+				setTimeout(() => {
+					renderingTable.value = false
+					autoUpdating.value = false
+				}, 0)
 			}
-			row.onmousedown = () => {
-				row.style.filter = 'brightness(.7)'
-			}
-			row.onmouseup = () => {
-				row.style.filter = 'brightness(1.2)'
-			}
-			row.onmouseleave = () => {
-				row.style.filter = 'brightness(1)'
-				row.style.padding = '0 17px'
-			}
-			let tds = row.innerText.split('%|').reduce((arr, curr) => {
-				arr.push(curr.trim())
-				return arr
-			}, [])
-			row.innerText = ''
-			tds.map((td) => {
-				let span = row.appendChild(document.createElement('span'))
-				span.style = spanStyle
-				span.innerText = td
-			})
-			setTimeout(() => {
-				renderingTable.value = false
-				autoUpdating.value = false
-			}, 0)
-		}
-	})
+		})
 }
 
 function themeUpdated() {
