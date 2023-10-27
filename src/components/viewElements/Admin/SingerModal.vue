@@ -12,22 +12,22 @@
 					<header>
 						<h1>{{ singer.artistic_name }}</h1>
 						<div class="buttonsWrapper" v-if="singer.evaluation">
-							<Button class="headerBt refreshBt" @click="refreshSingerData" v-if="evaluation != 'ALREADY_EVALUATED'">
+							<Button class="headerBt refreshBt" @click="refreshSingerData" v-if="evaluation != 'ALREADY_EVALUATED'" type="submit">
 								<Icon class="refresh" :size="1.5" />
 							</Button>
-							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE' || evaluation == 'ALREADY_EVALUATED'" @click="permitRatings">
+							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE' || evaluation == 'ALREADY_EVALUATED'" @click="permitRatings" type="submit">
 								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : evaluation == 'ALREADY_EVALUATED' ? 'Já avaliado' : 'Liberar para avaliação' }}
 							</Button>
-							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
+							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 5" @click="calculateMedia" type="submit">
 								Calcular média
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
 						</div>
 						<div class="buttonsWrapper" v-else>
-							<Button>
+							<Button class="headerBt" @click="sendEmail" :disabled="singer.singer_status == 'EVALUATION_SENT'" type="submit">
 								<div style="display: flex; gap: 7px; align-items: center;">
 									<Icon class="mail" :size="1.5" />
-									<b>Enviar email</b>
+									<b>{{ singer.singer_status == 'EVALUATION_SENT' ? 'Email enviado' : 'Enviar email' }}</b>
 								</div>
 							</Button>
 						</div>
@@ -170,6 +170,14 @@ function calculateMedia() {
 			`)
 			singer.value.evaluation = 'ALREADY_EVALUATED'
 			dispatchEvent('refreshTable')
+		})
+}
+
+function sendEmail() {
+	api.sendEvaluationEmail(singer.value.singer_id)
+		.then(() => {
+			Dialog.showMessage(`Email enviado com sucesso!`)
+			singer.value.singer_status = 'EVALUATION_SENT'
 		})
 }
 

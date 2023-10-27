@@ -95,5 +95,11 @@ export default {
 	},
 	getClassifiedSingers() {
 		return api.get(`v1/singers/list-evaluations?status=classification`, configs())
+	},
+	sendEvaluationEmail(singerId) {
+		return api.get(`v1/singers/send_evaluation_singer/${ singerId }`, configs())
+	},
+	generatePDF(ratingIds) {
+		return api.post(`v1/singers/generate_pdf`, ratingIds, configs())
 	}
 }

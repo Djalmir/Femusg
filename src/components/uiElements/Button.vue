@@ -1,8 +1,7 @@
 <template>
-	<button :disabled="loading">
+	<button :disabled="loading" ref="self">
 		<div v-if="loading && type == 'submit'" style="display: flex; align-items: center; justify-content: center; gap: .5rem;">
-			<Icon :size="1.25" class="loader" />
-			Carregando...
+			<Icon :size="1.5" class="loader" />
 		</div>
 		<slot v-else></slot>
 	</button>
@@ -12,6 +11,7 @@
 import { ref } from 'vue'
 import Icon from '@/components/uiElements/Icon.vue'
 
+const self = ref()
 const props = defineProps({
 	type: {
 		type: String,
@@ -22,7 +22,7 @@ const props = defineProps({
 const loading = ref(false)
 
 document.addEventListener('setLoading', (e) => {
-	if (props.type == 'submit')
+	if (props.type == 'submit' && (document.activeElement == self.value || !e.detail))
 		loading.value = e.detail ? true : false
 })
 </script>
