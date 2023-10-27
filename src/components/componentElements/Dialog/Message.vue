@@ -68,7 +68,8 @@ onMounted(() => {
 
 section {
 	flex: 1;
-	padding: 27px 13px 13px;
+	margin: 27px 13px 13px;
+	overflow: auto;
 }
 
 footer {

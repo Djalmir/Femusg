@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '@/router/router.js'
 import { store } from '@/store/store.js'
 import { dispatchEvent } from '@/utils.js'
 
@@ -17,11 +18,11 @@ api.interceptors.request.use((config) => {
 	dispatchEvent('setLoading', true)
 	return config
 }, (err) => {
+	console.log('err:', err)
 	dispatchEvent('setLoading', false)
 	let error = err.response?.data
 	if (error) {
 		dispatchEvent('showMessage', { error: error })
-		console.error(error)
 	}
 	else
 		dispatchEvent('showMessage', { error: 'Erro inesperado' })
@@ -33,9 +34,18 @@ api.interceptors.response.use((res) => {
 		dispatchEvent('setLoading', false)
 	return res
 }, (err) => {
+	console.log('err:', err)
 	dispatchEvent('setLoading', false)
 	let error = err.response?.data
-	if (error) {
+	if (error && error.message) {
+		if (error.message == 'Internal server err - Invalid JWT Token') {
+			dispatchEvent('showMessage', 'Sua sessão expirou. Por favor, faça o login novamente')
+			router.replace({ name: 'Login' })
+		}
+		else
+			dispatchEvent('showMessage', { error: error.message })
+	}
+	else if (error) {
 		dispatchEvent('showMessage', { error: error })
 		console.error(error)
 	}
@@ -79,5 +89,11 @@ export default {
 	},
 	getEvaluatingSinger() {
 		return api.get(`v1/singers/list-by-status`, configs())
+	},
+	getRatedSingers() {
+		return api.get(`v1/singers/list-evaluations?status=already_evaluated`, configs())
+	},
+	getClassifiedSingers() {
+		return api.get(`v1/singers/list-evaluations?status=classification`, configs())
 	}
 }

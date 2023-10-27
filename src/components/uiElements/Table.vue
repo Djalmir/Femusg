@@ -18,8 +18,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, onBeforeUnmount } from 'vue'
+import { onMounted, watch, ref, computed, onBeforeUnmount } from 'vue'
 import Icon from '@/components/uiElements/Icon.vue'
+
+const props = defineProps({
+	templateColumns: {
+		type: String,
+		default: "minmax(220px, 1fr) minmax(120px, .5fr) minmax(180px, 1fr) 1fr",
+	},
+})
+
 
 const headingRow = ref(null)
 const rows = ref(null)
@@ -34,6 +42,10 @@ const rowsWrapperHeight = computed(() => {
 })
 
 onMounted(() => {
+	if (props.templateColumns) {
+		document.documentElement.style.setProperty('--template-columns', props.templateColumns)
+	}
+
 	initObserver()
 	window.addEventListener('resize', () => {
 		windowHeight.value = window.innerHeight
@@ -43,15 +55,13 @@ onMounted(() => {
 const darkTheme = ref(document.documentElement.classList.contains('dark-theme'))
 const darkTitlesRow = `
 	display: grid;
-	// grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	grid-template-columns: minmax(220px, 1fr) minmax(120px, .5fr) minmax(180px, 1fr) 1fr;
+	grid-template-columns: var(--template-columns);
 	padding: 0 17px;
 	color: var(--dark-font2);
 `
 const lightTitlesRow = `
 	display: grid;
-	// grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	grid-template-columns: minmax(220px, 1fr) minmax(120px, .5fr) minmax(180px, 1fr) 1fr;
+	grid-template-columns: var(--template-columns);
 	padding: 0 17px;
 	color: var(--light-font2);
 `
@@ -65,8 +75,7 @@ const titleSpanStyle = `
 const darkRow = (idx) => {
 	return `
 		display: grid;
-		// grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-		grid-template-columns: minmax(220px, 1fr) minmax(120px, .5fr) minmax(180px, 1fr) 1fr;
+		grid-template-columns: var(--template-columns);
 		background: ${ idx % 2 ? 'var(--dark-bg1)' : 'var(--dark-bg3)' };
 		padding: 0 17px;
 		color: var(--dark-font1);
@@ -77,8 +86,7 @@ const darkRow = (idx) => {
 const lightRow = (idx) => {
 	return `
 		display: grid;
-		// grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-		grid-template-columns: minmax(220px, 1fr) minmax(120px, .5fr) minmax(180px, 1fr) 1fr;
+		grid-template-columns: var(--template-columns);
 		background: ${ idx % 2 ? 'var(--light-bg1)' : 'var(--light-bg3)' };
 		padding: 0 17px;
 		color: var(--light-font1);
@@ -87,7 +95,6 @@ const lightRow = (idx) => {
 	`
 }
 const spanStyle = `
-	// white-space: nowrap;
 	overflow: hidden;
 	padding: 11px 7px;
 `
@@ -115,35 +122,37 @@ function handleChildrenChanged() {
 
 	let rowsChildren = Array.from(rows.value.children)
 	rowsChildren.map((row, idx) => {
-		row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
-		row.onmouseenter = () => {
-			row.style.filter = 'brightness(1.2)'
-			row.style.padding = '7px 17px'
+		if (row.innerText.includes('%|')) {
+			row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
+			row.onmouseenter = () => {
+				row.style.filter = 'brightness(1.2)'
+				row.style.padding = '7px 17px'
+			}
+			row.onmousedown = () => {
+				row.style.filter = 'brightness(.7)'
+			}
+			row.onmouseup = () => {
+				row.style.filter = 'brightness(1.2)'
+			}
+			row.onmouseleave = () => {
+				row.style.filter = 'brightness(1)'
+				row.style.padding = '0 17px'
+			}
+			let tds = row.innerText.split('%|').reduce((arr, curr) => {
+				arr.push(curr.trim())
+				return arr
+			}, [])
+			row.innerText = ''
+			tds.map((td) => {
+				let span = row.appendChild(document.createElement('span'))
+				span.style = spanStyle
+				span.innerText = td
+			})
+			setTimeout(() => {
+				renderingTable.value = false
+				autoUpdating.value = false
+			}, 0)
 		}
-		row.onmousedown = () => {
-			row.style.filter = 'brightness(.7)'
-		}
-		row.onmouseup = () => {
-			row.style.filter = 'brightness(1.2)'
-		}
-		row.onmouseleave = () => {
-			row.style.filter = 'brightness(1)'
-			row.style.padding = '0 17px'
-		}
-		let tds = row.innerText.split('%|').reduce((arr, curr) => {
-			arr.push(curr.trim())
-			return arr
-		}, [])
-		row.innerText = ''
-		tds.map((td) => {
-			let span = row.appendChild(document.createElement('span'))
-			span.style = spanStyle
-			span.innerText = td
-		})
-		setTimeout(() => {
-			renderingTable.value = false
-			autoUpdating.value = false
-		}, 0)
 	})
 }
 
@@ -189,8 +198,8 @@ function refresh() {
 }
 
 onBeforeUnmount(() => {
-	observer.value.disconnect()
-	themeObserver.value.disconnect()
+	observer.value?.disconnect()
+	themeObserver.value?.disconnect()
 })
 
 defineExpose({
@@ -217,7 +226,7 @@ defineExpose({
 	top: -35px;
 	left: 0;
 	z-index: 1;
-	padding-top: 37px;
+	padding-top: 47px;
 	background: linear-gradient(145deg, var(--dark-bg2), var(--dark-bg1));
 	box-shadow: var(--dark-box-shadow);
 }

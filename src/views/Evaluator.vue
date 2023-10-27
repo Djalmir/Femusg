@@ -1,6 +1,6 @@
 <template>
 	<div class="wrapper">
-		<section v-if="singer && !singer.evaluated">
+		<section v-if="singer">
 			<h1 style="font-size: 1.7rem;">{{ singer.artistic_name }}</h1>
 			<hr>
 			<div class="content">
@@ -30,7 +30,7 @@
 						</div>
 					</div>
 				</div>
-				<Button class="sendRaingsBt" @click="evaluate">Enviar Avaliações</Button>
+				<Button class="sendRaingsBt" @click="evaluate" :disabled="singer.evaluated">{{ singer.evaluated ? 'Sua avaliação já foi enviada' : 'Enviar Avaliações' }}</Button>
 			</div>
 		</section>
 		<div v-else-if="loading" class="loaderWrapper">
@@ -38,9 +38,6 @@
 				<Icon class="loader" :size="2" />
 				Carregando...
 			</div>
-		</div>
-		<div v-else-if="singer && singer.evaluated" class="noSingerAvailable">
-			Você já avaliou o cantor atual...
 		</div>
 		<div v-else class="noSingerAvailable">
 			<b>Nenhum cantor disponível para avaliação</b>
@@ -50,6 +47,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, inject, onBeforeUnmount } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import Button from '@/components/uiElements/Button.vue'
 import Input from '@/components/formElements/Input.vue'
 import Icon from '@/components/uiElements/Icon.vue'
@@ -58,6 +57,8 @@ import { rateMask } from '@/utils.js'
 
 const Dialog = inject('Dialog').value
 const loading = ref(true)
+const store = useStore()
+const router = useRouter()
 const singer = ref(null)
 const cleanRatings = JSON.stringify({
 	tuning: {
@@ -87,8 +88,12 @@ const ratings = reactive({
 const ratingsWrapper = ref()
 
 onMounted(() => {
-	getSinger()
-	document.addEventListener('refreshTable', getSinger)
+	if (store.state.userProfile.profile != 'evaluator')
+		router.replace({ name: 'Login' })
+	else {
+		getSinger()
+		document.addEventListener('refreshTable', getSinger)
+	}
 })
 
 function getSinger() {
@@ -99,12 +104,12 @@ function getSinger() {
 		.then((res) => {
 			singer.value = res.data.find(s => s.evaluation == 'EVALUATION_AVAILABLE')
 			loading.value = false
-		})
-	api.getEvaluatingSinger()
-		.then((res) => {
-			// singer.value = res.data
-			// loading = false
-			singer.value.evaluated = res.data
+			if (singer.value) {
+				api.getEvaluatingSinger()
+					.then((res) => {
+						singer.value.evaluated = res.data
+					})
+			}
 		})
 }
 
@@ -171,7 +176,7 @@ async function evaluate() {
 		})
 			.then(() => {
 				Dialog.showMessage('Avaliações enviadas com sucesso')
-				refreshSingerData()
+				getSinger()
 			})
 	}
 }

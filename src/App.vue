@@ -12,16 +12,16 @@ import Dialog from '@/components/uiElements/Dialog.vue'
 const dialog = ref()
 provide('Dialog', dialog)
 
-document.addEventListener('showMessage', showMessage)
 
 onMounted(() => {
+	document.addEventListener('showMessage', showMessage)
 	if (window.matchMedia("(prefers-color-scheme: light)").matches) {
 		changeTheme()
 	}
 })
 
 function showMessage(msg) {
-	dialog.value.showMessage(msg.detail.error ? `<b class="errorMessage">${ msg.detail.error }</b>` : msg.detail.success ? `<b class="successMessage">${ msg.detail.success }</b>` : msg.detail)
+	dialog.value.showMessage(msg.detail.error ? `<b style="white-space: wrap; display: block">${ msg.detail.error }</b>` : msg.detail.success ? `<b style="white-space: wrap; display: block">${ msg.detail.success }</b>` : msg.detail)
 }
 
 function changeTheme() {
@@ -36,12 +36,4 @@ function changeTheme() {
 }
 </script>
 
-<style scoped>
-.errorMessage {
-	color: var(--danger) !important;
-}
-
-.successMessage {
-	color: var(--success) !important;
-}
-</style>
+<style scoped></style>

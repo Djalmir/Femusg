@@ -61,7 +61,7 @@ const dropdownList = ref([
 
 <style scoped>
 header {
-	background: linear-gradient(145deg, var(--dark-bg3-transparent), var(--dark-bg2-transparent));
+	background: linear-gradient(145deg, var(--dark-bg3), var(--dark-bg2));
 	width: 100%;
 	padding: 7px 17px;
 	box-shadow: var(--dark-box-shadow);
@@ -69,7 +69,7 @@ header {
 	align-items: center;
 	gap: 17px;
 	position: relative;
-	z-index: 2;
+	z-index: 3;
 }
 
 .logo {
@@ -80,7 +80,7 @@ header {
 }
 
 .light-theme header {
-	background: linear-gradient(145deg, var(--light-bg3-transparent), var(--light-bg2-transparent));
+	background: linear-gradient(145deg, var(--light-bg3), var(--light-bg2));
 	box-shadow: var(--light-box-shadow);
 }
 

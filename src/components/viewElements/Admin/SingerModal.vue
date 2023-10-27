@@ -11,38 +11,46 @@
 				<section>
 					<header>
 						<h1>{{ singer.artistic_name }}</h1>
-						<div class="buttonsWrapper">
-							<Button class="headerBt refreshBt" @click="refreshSingerData">
+						<div class="buttonsWrapper" v-if="singer.evaluation">
+							<Button class="headerBt refreshBt" @click="refreshSingerData" v-if="evaluation != 'ALREADY_EVALUATED'">
 								<Icon class="refresh" :size="1.5" />
 							</Button>
 							<Button class="headerBt" :disabled="evaluation == 'EVALUATION_AVAILABLE' || evaluation == 'ALREADY_EVALUATED'" @click="permitRatings">
 								{{ evaluation == 'EVALUATION_AVAILABLE' ? 'Em avaliação' : evaluation == 'ALREADY_EVALUATED' ? 'Já avaliado' : 'Liberar para avaliação' }}
 							</Button>
-							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 5" @click="calculateMedia">
+							<Button v-if="evaluation != 'ALREADY_EVALUATED'" class="headerBt" :disabled="ratingsLength < 1" @click="calculateMedia">
 								Calcular média
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
+						</div>
+						<div class="buttonsWrapper" v-else>
+							<Button>
+								<div style="display: flex; gap: 7px; align-items: center;">
+									<Icon class="mail" :size="1.5" />
+									<b>Enviar email</b>
+								</div>
+							</Button>
 						</div>
 					</header>
 					<div class="content">
 						<hr>
 						<div class="flexDiv">
 							<div>
-								<b>Nome: </b><span>{{ singer.name }}</span>
+								<b>Nome: </b><span>{{ singer.name || singer.singer_name }}</span>
 							</div>
-							<div>
+							<div v-if="singer.evaluation">
 								<b>CPF: </b><span>{{ cpfMask(singer.cpf) }}</span>
 							</div>
 						</div>
 						<div class="flexDiv">
 							<div>
-								<b>Email: </b><span>{{ singer.email }}</span>
+								<b>Email: </b><span>{{ singer.email || singer.singer_email }}</span>
 							</div>
-							<div>
+							<div v-if="singer.evaluation">
 								<b>Telefone: </b><span>{{ singer.phone }}</span>
 							</div>
 						</div>
-						<div class="flexDiv">
+						<div class="flexDiv" v-if="singer.evaluation">
 							<div>
 								<b>Endereço: </b><span>{{ singer.address }}</span>
 							</div>
@@ -56,7 +64,7 @@
 								<b>Música: </b><span>{{ singer.song_name }}</span>
 							</div>
 						</div>
-						<div class="flexDiv">
+						<div class="flexDiv" v-if="singer.evaluation">
 							<div>
 								<b>Apresentação: </b><span>{{ singer.presentation_type }}</span>
 							</div>
@@ -64,10 +72,17 @@
 								<b>Tom: </b><span>{{ singer.music_type }}</span>
 							</div>
 						</div>
-						<hr>
-						<div class="flexDiv">
+						<hr v-if="singer.evaluation">
+						<div class="flexDiv" v-if="singer.evaluation">
 							<div>
 								<b>Dados Bancários: </b><span>{{ singer.bank_account }}</span>
+							</div>
+						</div>
+						<hr v-if="singer.averages_ratings">
+						<div class="ratings" v-if="singer.averages_ratings">
+							<div v-for="(rating, index) in singer.averages_ratings" class="rating">
+								<b>{{ ratingNames[index] }}</b><br />
+								<span style="font-size: 1.5rem; display: block; text-align: center;">{{ rating.average }}</span>
 							</div>
 						</div>
 					</div>
@@ -81,13 +96,14 @@
 import { ref, computed, inject } from 'vue'
 import Button from '@/components/uiElements/Button.vue'
 import Icon from '@/components/uiElements/Icon.vue'
-import { cpfMask } from '@/utils.js'
+import { cpfMask, dispatchEvent } from '@/utils.js'
 import api from '@/services/api.js'
 
 const Dialog = inject('Dialog').value
 const singer = ref(false)
 const evaluation = computed(() => { return singer.value.evaluation })
 const ratingsLength = ref(0)
+const ratingNames = ['Afinação', 'Interpretação', 'Ritmo', 'Letra', 'Dicção']
 
 function show(newSinger) {
 	singer.value = newSinger
@@ -95,7 +111,6 @@ function show(newSinger) {
 }
 
 function refreshSingerData() {
-
 	if (singer.value.evaluation == 'WAITING_CALL') {
 		api.getSingerById(singer.value.id)
 			.then((res) => {
@@ -105,7 +120,7 @@ function refreshSingerData() {
 	else if (singer.value.evaluation == 'EVALUATION_AVAILABLE') {
 		api.getSingerRatings(singer.value.id)
 			.then((res) => {
-				ratingsLength.value = res.data.user_criteria.length
+				ratingsLength.value = res.data.user_criteria?.length || 0
 			})
 	}
 }
@@ -154,6 +169,7 @@ function calculateMedia() {
 				</div>
 			`)
 			singer.value.evaluation = 'ALREADY_EVALUATED'
+			dispatchEvent('refreshTable')
 		})
 }
 
@@ -299,6 +315,14 @@ hr {
 
 .light-theme hr {
 	border-bottom: 1px solid var(--light-bg1-transparent);
+}
+
+.ratings {
+	margin: 33px 0;
+	display: flex;
+	gap: 17px;
+	flex-wrap: wrap;
+	justify-content: center;
 }
 
 .fade-enter-from,
