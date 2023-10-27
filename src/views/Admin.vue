@@ -4,6 +4,11 @@
 			<Button :class="`tabBt ${currentView == 0 ? 'active' : ''}`" @click="goToView(0)">Inscritos</Button>
 			<Button :class="`tabBt ${currentView == 1 ? 'active' : ''}`" @click="goToView(1)">Avaliados</Button>
 			<Button :class="`tabBt ${currentView == 2 ? 'active' : ''}`" @click="goToView(2)">Classificados</Button>
+			<div v-if="currentView == 2" style="border-right: 1px solid var(--secondary); margin: 0 7px;"></div>
+			<Button v-if="currentView == 2" type="submit" class="tabBt" style="display: flex; align-items: center; gap: 7px; height: 31px;" @click="generatePDF">
+				<Icon class="file" :size="1.25" />
+				Gerar PDF
+			</Button>
 		</div>
 	</nav>
 	<Table ref="table0" v-if="currentView == 0">
@@ -191,6 +196,13 @@ function handleRefreshTable() {
 	}
 }
 
+function generatePDF() {
+	window.open(`${ import.meta.env.VITE_BASE_URL }v1/singers/generate_pdf?averages_ratings_ids=${ singers.value.reduce((curr, arr) => {
+		arr.push(curr.singer_id)
+		return arr
+	}, []) }`, '_blank')
+}
+
 onBeforeUnmount(() => {
 	document.removeEventListener('refreshTable', handleRefreshTable)
 })
@@ -208,6 +220,8 @@ nav {
 	transition: .3s;
 	left: 0;
 	z-index: 2;
+	display: flex;
+	flex-direction: column;
 }
 
 .light-theme nav {

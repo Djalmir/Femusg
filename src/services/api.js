@@ -100,6 +100,6 @@ export default {
 		return api.get(`v1/singers/send_evaluation_singer/${ singerId }`, configs())
 	},
 	generatePDF(ratingIds) {
-		return api.post(`v1/singers/generate_pdf`, ratingIds, configs())
+		return api.get(`v1/singers/generate_pdf?averages_ratings_ids=${ ratingIds.join(',') }`, configs())
 	}
 }
