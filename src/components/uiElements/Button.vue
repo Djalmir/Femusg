@@ -37,6 +37,7 @@ button {
 	cursor: pointer;
 	box-shadow: var(--dark-box-shadow);
 	user-select: none;
+	white-space: nowrap;
 }
 
 button:hover {

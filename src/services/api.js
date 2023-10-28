@@ -67,7 +67,7 @@ export default {
 		return api.post('v1/authenticate/login', { email, password })
 	},
 	getSingers() {
-		return api.get('v1/singers/list', configs())
+		return api.get('v1/singers/list?id=2', configs())
 	},
 	searchSinger(search) {
 		return api.get(`v1/singers/list-by-field?field=${ search }`, configs())
@@ -91,10 +91,10 @@ export default {
 		return api.get(`v1/singers/list-by-status`, configs())
 	},
 	getRatedSingers() {
-		return api.get(`v1/singers/list-evaluations?status=already_evaluated`, configs())
+		return api.get(`v1/singers/list-evaluations?status=already_evaluated&id=2`, configs())
 	},
 	getClassifiedSingers() {
-		return api.get(`v1/singers/list-evaluations?status=classification`, configs())
+		return api.get(`v1/singers/list-evaluations?status=classification&id=2`, configs())
 	},
 	sendEvaluationEmail(singerId) {
 		return api.get(`v1/singers/send_evaluation_singer/${ singerId }`, configs())

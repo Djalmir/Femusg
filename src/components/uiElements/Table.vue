@@ -121,7 +121,6 @@ function handleChildrenChanged() {
 	}
 
 	let rowsChildren = Array.from(rows.value.children)
-	console.log(rowsChildren)
 	if (!rowsChildren.length) {
 		renderingTable.value = false
 		autoUpdating.value = false

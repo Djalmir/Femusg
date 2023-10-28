@@ -4,7 +4,7 @@
 			<Button :class="`tabBt ${currentView == 0 ? 'active' : ''}`" @click="goToView(0)">Inscritos</Button>
 			<Button :class="`tabBt ${currentView == 1 ? 'active' : ''}`" @click="goToView(1)">Avaliados</Button>
 			<Button :class="`tabBt ${currentView == 2 ? 'active' : ''}`" @click="goToView(2)">Classificados</Button>
-			<div v-if="currentView == 2" style="border-right: 1px solid var(--secondary); margin: 0 7px;"></div>
+			<div v-if="currentView == 2" class="separator"></div>
 			<Button v-if="currentView == 2" type="submit" class="tabBt" style="display: flex; align-items: center; gap: 7px; height: 31px;" @click="generatePDF">
 				<Icon class="file" :size="1.25" />
 				Gerar PDF
@@ -197,10 +197,11 @@ function handleRefreshTable() {
 }
 
 function generatePDF() {
-	window.open(`${ import.meta.env.VITE_BASE_URL }v1/singers/generate_pdf?averages_ratings_ids=${ singers.value.reduce((curr, arr) => {
+	let singerIds = singers.value.reduce((arr, curr) => {
 		arr.push(curr.singer_id)
 		return arr
-	}, []) }`, '_blank')
+	}, [])
+	window.open(`${ import.meta.env.VITE_BASE_URL }v1/singers/generate_pdf?averages_ratings_ids=${ singerIds }`, '_blank')
 }
 
 onBeforeUnmount(() => {
@@ -233,6 +234,13 @@ nav {
 	padding: 7px 17px;
 	display: flex;
 	gap: 7px;
+	width: fit-content;
+	max-width: 90vw;
+	overflow: auto;
+}
+
+.buttonsWrapper::-webkit-scrollbar {
+	height: 3px;
 }
 
 .tabBt {
@@ -248,6 +256,15 @@ nav {
 .tabBt.active {
 	background: linear-gradient(145deg, var(--primary-light), var(--primary));
 	color: var(--dark-font1);
+}
+
+.separator {
+	border-right: 1px solid var(--dark-bg3);
+	margin: 0 7px;
+}
+
+.light-theme .separator {
+	border-right: 1px solid var(--secondary-light);
 }
 
 .searchDiv {
