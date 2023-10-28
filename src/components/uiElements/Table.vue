@@ -124,7 +124,6 @@ function handleChildrenChanged() {
 		}
 
 		let rowsChildren = Array.from(rows.value.children)
-		console.log('rowsChildren', rowsChildren)
 		rowsChildren.map((row, idx) => {
 			if (row.innerText.includes('%|')) {
 				row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
