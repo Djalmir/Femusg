@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref, computed, onBeforeUnmount } from 'vue'
+import { onMounted, ref, computed, onBeforeUnmount } from 'vue'
 import Icon from '@/components/uiElements/Icon.vue'
 
 const props = defineProps({
@@ -50,6 +50,8 @@ onMounted(() => {
 	window.addEventListener('resize', () => {
 		windowHeight.value = window.innerHeight
 	})
+
+	document.addEventListener('setLoading', setLoading)
 })
 
 const darkTheme = ref(document.documentElement.classList.contains('dark-theme'))
@@ -122,44 +124,40 @@ function handleChildrenChanged() {
 		}
 
 		let rowsChildren = Array.from(rows.value.children)
-		if (!rowsChildren.length) {
+		console.log('rowsChildren', rowsChildren)
+		rowsChildren.map((row, idx) => {
+			if (row.innerText.includes('%|')) {
+				row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
+				row.onmouseenter = () => {
+					row.style.filter = 'brightness(1.2)'
+					row.style.padding = '7px 17px'
+				}
+				row.onmousedown = () => {
+					row.style.filter = 'brightness(.7)'
+				}
+				row.onmouseup = () => {
+					row.style.filter = 'brightness(1.2)'
+				}
+				row.onmouseleave = () => {
+					row.style.filter = 'brightness(1)'
+					row.style.padding = '0 17px'
+				}
+				let tds = row.innerText.split('%|').reduce((arr, curr) => {
+					arr.push(curr.trim())
+					return arr
+				}, [])
+				row.innerText = ''
+				tds.map((td) => {
+					let span = row.appendChild(document.createElement('span'))
+					span.style = spanStyle
+					span.innerText = td
+				})
+			}
+		})
+		setTimeout(() => {
 			renderingTable.value = false
 			autoUpdating.value = false
-		}
-		else
-			rowsChildren.map((row, idx) => {
-				if (row.innerText.includes('%|')) {
-					row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
-					row.onmouseenter = () => {
-						row.style.filter = 'brightness(1.2)'
-						row.style.padding = '7px 17px'
-					}
-					row.onmousedown = () => {
-						row.style.filter = 'brightness(.7)'
-					}
-					row.onmouseup = () => {
-						row.style.filter = 'brightness(1.2)'
-					}
-					row.onmouseleave = () => {
-						row.style.filter = 'brightness(1)'
-						row.style.padding = '0 17px'
-					}
-					let tds = row.innerText.split('%|').reduce((arr, curr) => {
-						arr.push(curr.trim())
-						return arr
-					}, [])
-					row.innerText = ''
-					tds.map((td) => {
-						let span = row.appendChild(document.createElement('span'))
-						span.style = spanStyle
-						span.innerText = td
-					})
-					setTimeout(() => {
-						renderingTable.value = false
-						autoUpdating.value = false
-					}, 0)
-				}
-			})
+		}, 0)
 	}, 0)
 }
 
@@ -182,9 +180,7 @@ function initObserver() {
 	}
 	observer.value = new MutationObserver(() => {
 		if (!autoUpdating.value)
-			setTimeout(() => {
-				handleChildrenChanged()
-			}, 0)
+			handleChildrenChanged()
 	})
 	observer.value.observe(headingRow.value, config)
 	observer.value.observe(rows.value, config)
@@ -202,6 +198,11 @@ function initObserver() {
 
 function refresh() {
 	handleChildrenChanged()
+}
+
+function setLoading(loading) {
+	if (loading)
+		renderingTable.value = true
 }
 
 onBeforeUnmount(() => {
