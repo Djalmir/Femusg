@@ -70,13 +70,13 @@ export default {
 		return api.get('v1/singers/list?id=2', configs())
 	},
 	searchSinger(search) {
-		return api.get(`v1/singers/list-by-field?field=${ search }`, configs())
+		return api.get(`v1/singers/list-by-field?field=${ search }&id=2`, configs())
 	},
 	getSingerById(singerId) {
 		return api.get(`v1/singers/details/${ singerId }`, configs())
 	},
 	getSingerRatings(singerId) {
-		return api.get(`v1/singers-rating/singer/${ singerId }`, configs())
+		return api.get(`v1/singers-rating/singer/${ singerId }&event_id=2`, configs())
 	},
 	updateSingerData(singerId, data) {
 		return api.put(`v1/singers/update/${ singerId }`, data, configs())

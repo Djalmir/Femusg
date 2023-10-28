@@ -150,6 +150,7 @@ async function evaluate() {
 	`)) {
 		api.sendRatings({
 			"singer_id": singer.value.id,
+			"event_id": 2,
 			"criteria": [
 				{
 					"criterion_id": 1,
