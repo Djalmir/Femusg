@@ -23,14 +23,14 @@
 							</Button>
 							<sup v-if="evaluation == 'EVALUATION_AVAILABLE'">{{ `${ratingsLength == 0 ? 'Nenhuma' : ratingsLength == 1 ? 'Uma' : ratingsLength} avaliaç${ratingsLength > 1 ? 'ões' : 'ão'}` }}</sup>
 						</div>
-						<div class="buttonsWrapper" v-else>
+						<!-- <div class="buttonsWrapper" v-else>
 							<Button class="headerBt" @click="sendEmail" :disabled="singer.singer_status == 'EVALUATION_SENT'" type="submit">
 								<div style="display: flex; gap: 7px; align-items: center;">
 									<Icon class="mail" :size="1.5" />
 									<b>{{ singer.singer_status == 'EVALUATION_SENT' ? 'Email enviado' : 'Enviar email' }}</b>
 								</div>
 							</Button>
-						</div>
+						</div> -->
 					</header>
 					<div class="content">
 						<hr>
