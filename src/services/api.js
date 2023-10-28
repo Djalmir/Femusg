@@ -85,7 +85,7 @@ export default {
 		return api.post(`v1/singers-rating/create`, data, configs())
 	},
 	calculateMedia(singerId) {
-		return api.get(`v1/singers-rating/calculate-media/${ singerId }`, configs())
+		return api.get(`v1/singers-rating/calculate-media/${ singerId }?event_id=2`, configs())
 	},
 	getEvaluatingSinger() {
 		return api.get(`v1/singers/list-by-status`, configs())
