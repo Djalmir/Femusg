@@ -168,17 +168,19 @@ function handleEnterKey() {
 }
 
 function goToView(view) {
-	currentView.value = view
-	switch (view) {
-		case 0:
-			getSingers()
-			break
-		case 1:
-			getRatedSingers()
-			break
-		case 2:
-			getClassifiedSingers()
-			break
+	if (currentView.value != view) {
+		currentView.value = view
+		switch (view) {
+			case 0:
+				getSingers()
+				break
+			case 1:
+				getRatedSingers()
+				break
+			case 2:
+				getClassifiedSingers()
+				break
+		}
 	}
 }
 

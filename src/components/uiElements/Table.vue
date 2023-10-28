@@ -103,62 +103,64 @@ function handleChildrenChanged() {
 	renderingTable.value = true
 	autoUpdating.value = true
 
-	if (!titleStyleDone) {
-		let titlesRow = headingRow.value.children[0]
-		titlesRow.classList.add('titlesRow')
-		titlesRow.style = darkTheme.value ? darkTitlesRow : lightTitlesRow
-		let tds = titlesRow.innerText.split('%|').reduce((arr, curr) => {
-			arr.push(curr.trim())
-			return arr
-		}, [])
-		titlesRow.innerText = ''
-		tds.map((td) => {
-			let span = titlesRow.appendChild(document.createElement('span'))
-			span.style = titleSpanStyle
-			span.innerText = td
-		})
-		titleStyleDone = true
-	}
+	setTimeout(() => {
+		if (!titleStyleDone) {
+			let titlesRow = headingRow.value.children[0]
+			titlesRow.classList.add('titlesRow')
+			titlesRow.style = darkTheme.value ? darkTitlesRow : lightTitlesRow
+			let tds = titlesRow.innerText.split('%|').reduce((arr, curr) => {
+				arr.push(curr.trim())
+				return arr
+			}, [])
+			titlesRow.innerText = ''
+			tds.map((td) => {
+				let span = titlesRow.appendChild(document.createElement('span'))
+				span.style = titleSpanStyle
+				span.innerText = td
+			})
+			titleStyleDone = true
+		}
 
-	let rowsChildren = Array.from(rows.value.children)
-	if (!rowsChildren.length) {
-		renderingTable.value = false
-		autoUpdating.value = false
-	}
-	else
-		rowsChildren.map((row, idx) => {
-			if (row.innerText.includes('%|')) {
-				row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
-				row.onmouseenter = () => {
-					row.style.filter = 'brightness(1.2)'
-					row.style.padding = '7px 17px'
+		let rowsChildren = Array.from(rows.value.children)
+		if (!rowsChildren.length) {
+			renderingTable.value = false
+			autoUpdating.value = false
+		}
+		else
+			rowsChildren.map((row, idx) => {
+				if (row.innerText.includes('%|')) {
+					row.style = darkTheme.value ? darkRow(idx) : lightRow(idx)
+					row.onmouseenter = () => {
+						row.style.filter = 'brightness(1.2)'
+						row.style.padding = '7px 17px'
+					}
+					row.onmousedown = () => {
+						row.style.filter = 'brightness(.7)'
+					}
+					row.onmouseup = () => {
+						row.style.filter = 'brightness(1.2)'
+					}
+					row.onmouseleave = () => {
+						row.style.filter = 'brightness(1)'
+						row.style.padding = '0 17px'
+					}
+					let tds = row.innerText.split('%|').reduce((arr, curr) => {
+						arr.push(curr.trim())
+						return arr
+					}, [])
+					row.innerText = ''
+					tds.map((td) => {
+						let span = row.appendChild(document.createElement('span'))
+						span.style = spanStyle
+						span.innerText = td
+					})
+					setTimeout(() => {
+						renderingTable.value = false
+						autoUpdating.value = false
+					}, 0)
 				}
-				row.onmousedown = () => {
-					row.style.filter = 'brightness(.7)'
-				}
-				row.onmouseup = () => {
-					row.style.filter = 'brightness(1.2)'
-				}
-				row.onmouseleave = () => {
-					row.style.filter = 'brightness(1)'
-					row.style.padding = '0 17px'
-				}
-				let tds = row.innerText.split('%|').reduce((arr, curr) => {
-					arr.push(curr.trim())
-					return arr
-				}, [])
-				row.innerText = ''
-				tds.map((td) => {
-					let span = row.appendChild(document.createElement('span'))
-					span.style = spanStyle
-					span.innerText = td
-				})
-				setTimeout(() => {
-					renderingTable.value = false
-					autoUpdating.value = false
-				}, 0)
-			}
-		})
+			})
+	}, 0)
 }
 
 function themeUpdated() {
